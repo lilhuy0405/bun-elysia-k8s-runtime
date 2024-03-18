@@ -5,11 +5,13 @@ import {highlight, languages} from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
+import toast from "react-hot-toast";
 
 const resUrl = "https://elysia-container-runtime.lilhuy-server.uk/"
 const updateApiUrl = "https://elysia-container-runtime-be.lilhuy-server.uk/update-code"
 
 function App() {
+  const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState('');
   const fetchResult = async () => {
     try {
@@ -26,6 +28,7 @@ function App() {
   }, []);
   const handleSubmit = async () => {
     try {
+      setLoading(true)
       const res = await fetch(updateApiUrl, {
         method: 'POST',
         headers: {
@@ -35,10 +38,12 @@ function App() {
       });
       const data = await res.json();
       console.log(data);
-      fetchResult();
-      alert('Code updated')
+      await fetchResult();
+      toast.success('Code updated successfully');
     } catch (e: any) {
-      alert(e.message)
+      toast.error(e.message);
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -73,13 +78,17 @@ console.log("app is running at 3000")
             }}
           />
         </div>
-        <button onClick={handleSubmit}>SUBMIT CODE</button>
+        <button onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Updating...' : 'Update code'}
+        </button>
         <div>
-          <h3>Result on GET <a href="https://elysia-container-runtime.lilhuy-server.uk/"
-                               target='_blank'>https://elysia-container-runtime.lilhuy-server.uk/</a></h3>
-          <pre>
+          <h3>Result on GET: <a href="https://elysia-container-runtime.lilhuy-server.uk/"
+                                target='_blank'>https://elysia-container-runtime.lilhuy-server.uk/</a></h3>
+          <div style={{border: '1px solid black'}}>
+            <pre>
             {result}
           </pre>
+          </div>
 
         </div>
       </div>
